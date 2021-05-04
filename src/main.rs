@@ -9,6 +9,13 @@ fn main() {
     board.place_wall(new_point(3, 0), false);
     board.place_wall(new_point(5, 5), true);
     board.place_wall(new_point(0, 0), false);
+    board.move_pawn(0, board::Direction::Up);
+    
+    board = board.move_pawn(0, board::Direction::Right);
+    
+    board = board.move_pawn(0, board::Direction::Right);
+    
+    board = board.move_pawn(0, board::Direction::Up);
 
     println!("{}", board.to_string());
 }

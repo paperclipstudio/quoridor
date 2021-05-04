@@ -1,15 +1,31 @@
+#![crate_name = "Quoridor Game"]
 pub mod point;
 mod wall;
 
 use point::Point;
 use wall::Wall;
+#[derive(Clone, Copy)]
 struct Pawn {
     location: point::Point,
     target: i32,
 }
 
-impl Pawn {}
-enum Direction {
+impl Pawn {
+    fn move_to(&self, direction: Direction) -> Pawn {
+        return Pawn {
+            location: match direction {
+                Up => self.location.shift(0, 1),
+                Right => self.location.shift(1, 0),
+                Down => self.location.shift(0, -1),
+                Left => self.location.shift(-1, 0),
+            },
+            target: self.target,
+        };
+    }
+}
+
+#[derive(Clone, Copy)]
+pub enum Direction {
     Up,
     Down,
     Left,
@@ -25,6 +41,9 @@ const GAP_TEXT: &str = "⬜";
 const WALL_TEXT: &str = "🟥";
 const NO_WALL_TEXT: &str = "  ";
 const MAX_WALLS: usize = 20;
+
+/// One complete game state
+#[derive(Clone, Copy)]
 pub struct Board {
     width: i32,
     height: i32,
@@ -34,6 +53,24 @@ pub struct Board {
 }
 
 impl Board {
+    /// Moves a player pawn in a direction
+    /// return true if that move is valid and was applied
+    pub fn move_pawn(self, pawn_index: usize, direction: Direction) -> Board {
+        if self.pawns.len() >= pawn_index {
+            // Invalid pawn index
+            //return self;
+        }
+        let mut result = self;
+        let pawn = result.pawns[pawn_index].move_to(direction);
+        let mut pawns = result.pawns;
+        pawns[pawn_index] = pawn;
+        if !result.can_move(pawn.location, direction) {
+            //return result;
+        }
+        result.pawns = pawns;
+        return result;
+    }
+
     pub fn place_wall(&mut self, point: Point, vertical: bool) {
         if self.next_wall < MAX_WALLS {
             self.walls[self.next_wall] = Wall {
@@ -105,7 +142,7 @@ impl ToString for Board {
         for y in 0..self.width {
             let mut line: String = String::from("");
             for x in 0..self.height {
-                let here = new_point( x, y);
+                let here = new_point(x, y);
                 line += if self.pawn_here(here) {
                     PAWN_TEXT
                 } else {
@@ -122,7 +159,7 @@ impl ToString for Board {
 
             let mut line2 = String::from("");
             for x in 0..self.height {
-                let here = new_point(x ,y );
+                let here = new_point(x, y);
                 line2 += if self.can_move(here, Up) {
                     WALL_TEXT
                 } else {

@@ -1,4 +1,4 @@
-#![crate_name = "Quoridor Game"]
+//#![crate_name = "Quoridor Game"]
 pub mod point;
 mod wall;
 
@@ -47,6 +47,7 @@ const MAX_WALLS: usize = 20;
 pub struct Board {
     width: i32,
     height: i32,
+    turn: usize,
     pawns: [Pawn; 2],
     walls: [wall::Wall; MAX_WALLS],
     next_wall: usize,
@@ -55,33 +56,36 @@ pub struct Board {
 impl Board {
     /// Moves a player pawn in a direction
     /// return true if that move is valid and was applied
-    pub fn move_pawn(self, pawn_index: usize, direction: Direction) -> Board {
-        if self.pawns.len() >= pawn_index {
+    pub fn move_pawn(self, direction: Direction) -> Board {
+        if self.pawns.len() >= self.turn {
             // Invalid pawn index
             //return self;
         }
         let mut result = self;
-        let pawn = result.pawns[pawn_index].move_to(direction);
+        let pawn = result.pawns[self.turn].move_to(direction);
         let mut pawns = result.pawns;
-        pawns[pawn_index] = pawn;
+        pawns[self.turn] = pawn;
         if !result.can_move(pawn.location, direction) {
             //return result;
         }
         result.pawns = pawns;
+        result.turn = (result.turn + 1) % result.pawns.len();
         return result;
     }
 
-    pub fn place_wall(&mut self, point: Point, vertical: bool) {
-        if self.next_wall < MAX_WALLS {
-            self.walls[self.next_wall] = Wall {
+    pub fn place_wall(self, point: Point, vertical: bool) -> Board {
+        let mut result = self;
+        if result.next_wall < MAX_WALLS {
+            result.walls[self.next_wall] = Wall {
                 location: point,
                 vertical,
             };
-            self.next_wall += 1;
+            result.next_wall += 1;
         }
+        return result;
     }
 
-    fn pawn_here(&self, point: point::Point) -> bool {
+    fn pawn_here(self, point: point::Point) -> bool {
         for p in self.pawns.iter() {
             if p.location == point {
                 return true;
@@ -90,7 +94,7 @@ impl Board {
         return false;
     }
 
-    fn wall_here(&self, here: point::Point) -> bool {
+    fn wall_here(self, here: point::Point) -> bool {
         for wall in self.walls.iter() {
             if wall.location == here {
                 return true;
@@ -98,7 +102,7 @@ impl Board {
         }
         return false;
     }
-    fn can_move(&self, point: point::Point, direction: Direction) -> bool {
+    fn can_move(self, point: point::Point, direction: Direction) -> bool {
         let point1: Point;
         let point2: Point;
         let vertical: bool;
@@ -180,6 +184,7 @@ impl ToString for Board {
 
 pub fn default_board() -> Board {
     return Board {
+        turn: 0,
         width: 9,
         height: 9,
         pawns: [

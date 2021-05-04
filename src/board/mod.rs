@@ -73,16 +73,22 @@ impl Board {
         return result;
     }
 
-    pub fn place_wall(self, point: Point, vertical: bool) -> Board {
-        let mut result = self;
-        if result.next_wall < MAX_WALLS {
-            result.walls[self.next_wall] = Wall {
+    pub fn place_wall(mut self, point: Point, vertical: bool) -> Board {
+        if self.next_wall < MAX_WALLS {
+            self.walls[self.next_wall] = Wall {
                 location: point,
                 vertical,
             };
-            result.next_wall += 1;
+            self.next_wall += 1;
+            return self.inc_turn();
         }
-        return result;
+        // Wall couldn't be placed, nothing changed
+        return self;
+    }
+
+    fn inc_turn(mut self) -> Board {
+        self.turn = (self.turn + 1) % self.pawns.len();
+        return self;
     }
 
     fn pawn_here(self, point: point::Point) -> bool {

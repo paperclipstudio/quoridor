@@ -36,9 +36,9 @@ use Direction::*;
 
 use self::point::new_point;
 
-const PAWN_TEXT: &str = "🕵️‍♀️";
-const GAP_TEXT: &str = "⬜";
-const WALL_TEXT: &str = "🟥";
+const PAWN_TEXT: &str = "😎";
+const GAP_TEXT: &str = "⭕";
+const WALL_TEXT: &str = "❌";
 const NO_WALL_TEXT: &str = "  ";
 const MAX_WALLS: usize = 20;
 

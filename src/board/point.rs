@@ -3,8 +3,8 @@ type Row = i32;
 type Col = i32;
 #[derive(PartialEq, Clone, Copy)]
 pub struct Point {
-    x: Col,
-    y: Row,
+    pub x: Col,
+    pub y: Row,
 }
 
 pub fn new_point(x:i32, y:i32) -> Point{

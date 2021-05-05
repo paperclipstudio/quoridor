@@ -73,6 +73,15 @@ impl Board {
         return result;
     }
 
+    pub fn is_won(self) -> bool {
+        for p in self.pawns.iter() {
+            if p.location.y == p.target {
+                return true;
+            }
+        }
+        return false;
+    }
+
     pub fn place_wall(mut self, point: Point, vertical: bool) -> Board {
         if self.next_wall < MAX_WALLS {
             self.walls[self.next_wall] = Wall {

@@ -8,7 +8,7 @@ pub struct Wall {
 
 pub fn default_wall() -> Wall {
     return Wall {
-        location: point::new_point(-1 , -1),
+        location: point::create(-1 , -1),
         vertical: false,
     };
 }

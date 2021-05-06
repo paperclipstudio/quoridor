@@ -1,28 +1,11 @@
 //#![crate_name = "Quoridor Game"]
 pub mod point;
 mod wall;
+mod pawn;
 
 use point::Point;
 use wall::Wall;
-#[derive(Clone, Copy)]
-struct Pawn {
-    location: point::Point,
-    target: i32,
-}
-
-impl Pawn {
-    fn move_to(&self, direction: Direction) -> Pawn {
-        return Pawn {
-            location: match direction {
-                Up => self.location.shift(0, 1),
-                Right => self.location.shift(1, 0),
-                Down => self.location.shift(0, -1),
-                Left => self.location.shift(-1, 0),
-            },
-            target: self.target,
-        };
-    }
-}
+use pawn::Pawn;
 
 #[derive(Clone, Copy)]
 pub enum Direction {
@@ -34,7 +17,7 @@ pub enum Direction {
 
 use Direction::*;
 
-use self::point::new_point;
+use self::point::create;
 
 const PAWN_TEXT: &str = "😎";
 const GAP_TEXT: &str = "⭕";
@@ -56,30 +39,24 @@ pub struct Board {
 impl Board {
     /// Moves a player pawn in a direction
     /// return true if that move is valid and was applied
-    pub fn move_pawn(self, direction: Direction) -> Board {
+    pub fn move_pawn(mut self, direction: Direction) -> Board { 
         if self.pawns.len() >= self.turn {
             // Invalid pawn index
             //return self;
         }
-        let mut result = self;
-        let pawn = result.pawns[self.turn].move_to(direction);
-        let mut pawns = result.pawns;
-        pawns[self.turn] = pawn;
-        if !result.can_move(pawn.location, direction) {
-            //return result;
+        if !self.can_move(self.pawns[self.turn].location, direction) {
+            return self;
         }
-        result.pawns = pawns;
-        result.turn = (result.turn + 1) % result.pawns.len();
-        return result;
+        self.pawns[self.turn] = self.pawns[self.turn].move_to(direction);
+         
+        self.turn = (self.turn + 1) % self.pawns.len();
+        return self;
     }
 
+    // Returns true if any Pawn in is in a winning state
     pub fn is_won(self) -> bool {
-        for p in self.pawns.iter() {
-            if p.location.y == p.target {
-                return true;
-            }
-        }
-        return false;
+        return  self.pawns[0].location.y == 8 ||
+            self.pawns[1].location.y == 0;
     }
 
     pub fn place_wall(mut self, point: Point, vertical: bool) -> Board {
@@ -157,11 +134,13 @@ impl Board {
 
 impl ToString for Board {
     fn to_string(&self) -> String {
-        let mut result = String::from("");
+        let mut result = String::new();
         for y in 0..self.width {
-            let mut line: String = String::from("");
+            
+            let mut line: String = String::new();
+            line += "  ";
             for x in 0..self.height {
-                let here = new_point(x, y);
+                let here = create(x, y);
                 line += if self.pawn_here(here) {
                     PAWN_TEXT
                 } else {
@@ -174,11 +153,20 @@ impl ToString for Board {
                 };
             }
             line += "\n";
+            if y == 8 {
+                //continue;
+            }
+            // Add Row Letters
             result = line + &result;
 
+
+            // Print walls
             let mut line2 = String::from("");
+            line2.push(('A' as u8 + y as u8) as char);
+            line2.push(' ');
             for x in 0..self.height {
-                let here = new_point(x, y);
+                let here = create(x, y);
+
                 line2 += if self.can_move(here, Up) {
                     WALL_TEXT
                 } else {
@@ -192,7 +180,22 @@ impl ToString for Board {
             }
             line2.push('\n');
             result = line2 + &result;
+
+            
         }
+        // Add Column numbers
+        let mut labels: String= 
+        (1..9)
+        .map(|n|n.to_string())
+        .map(|n| String::from("   ") + &n)
+        .collect();
+
+        labels = String::from("  ") + &labels;
+
+        result = result + &labels;
+        result += "\n";
+        
+
         return result;
     }
 }
@@ -203,16 +206,33 @@ pub fn default_board() -> Board {
         width: 9,
         height: 9,
         pawns: [
-            Pawn {
-                location: new_point(4, 0),
-                target: 8,
-            },
-            Pawn {
-                location: new_point(4, 8),
-                target: 0,
-            },
+            Pawn::create().set_location(4, 0),
+            Pawn::create().set_location(4, 8)
         ],
         walls: [wall::default_wall(); 20],
         next_wall: 0,
     };
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn winning_state() {
+        let mut board = default_board();
+        assert!(!board.is_won());
+        board.pawns[0] = Pawn::create().set_location(3, 8);
+        println!("{}", board.to_string());
+        assert!(board.is_won());
+        board.move_pawn(Left);
+        assert!(board.is_won());
+        board.pawns[0] = Pawn::create().set_location(0, 0);
+        assert!(!board.is_won());
+        board.pawns[1] = Pawn::create().set_location(0, 0);
+        assert!(board.is_won());
+
+
+
+
+    }
 }

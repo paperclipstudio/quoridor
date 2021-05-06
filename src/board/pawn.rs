@@ -1,5 +1,5 @@
 use super::*;
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Pawn {
     pub location: Point
 }
@@ -20,8 +20,6 @@ impl Pawn {
             location: Point::origin()
         };
     }
-
-    
 
     pub fn set_location(mut self, x: i32, y: i32) -> Pawn{
         self.location = point::create(x, y);

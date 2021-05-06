@@ -92,7 +92,7 @@ fn place_wall(board: Board) -> Board {
     let row:i32 = selection.chars().nth(0).unwrap() as i32 - 'A' as i32;
     let col:i32 = selection.chars().nth(1).unwrap() as i32 - '1' as i32;
     return board.place_wall(
-        point::create(row, col),
+        point::create(col, row),
         direction == 0);
 }
 

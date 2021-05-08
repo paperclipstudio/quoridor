@@ -62,7 +62,7 @@ impl Board {
         return self.walls_used[0] + self.walls_used[1];
     }
 
-    fn valid_wall_location(&self, wall_to_check:Wall) -> bool {
+    fn valid_wall_location(&self, wall_to_check: Wall) -> bool {
         for wall in self.walls.iter() {
             if wall.clashes(wall_to_check) {
                 return false;
@@ -72,12 +72,11 @@ impl Board {
     }
 
     pub fn place_wall(mut self, point: Point, vertical: bool) -> Board {
-        let new_wall = Wall{
+        let new_wall = Wall {
             location: point,
-            vertical
+            vertical,
         };
-        if self.next_wall() < MAX_WALLS
-            && self.valid_wall_location(new_wall){
+        if self.next_wall() < MAX_WALLS && self.valid_wall_location(new_wall) {
             self.walls[self.next_wall()] = new_wall;
             self.walls_used[self.turn] += 1;
             return self.inc_turn();
@@ -109,8 +108,15 @@ impl Board {
         return false;
     }
 
-
     fn can_move(self, point: point::Point, direction: Direction) -> bool {
+        // Find out if moves off of board
+        let move_to = point.shift_direction(direction);
+        if move_to.x < 0 || move_to.x >= self.width 
+        || move_to.y < 0 || move_to.y >= self.height {
+            return false;
+        }
+
+
         let point1: Point;
         let point2: Point;
         let vertical: bool;
@@ -212,7 +218,6 @@ impl ToString for Board {
     }
 }
 
-
 impl PartialEq for Board {
     fn eq(&self, other: &Board) -> bool {
         if self.pawns[0] != other.pawns[0]
@@ -275,9 +280,7 @@ mod tests {
         let mut board = default_board();
         board = board.place_wall(point::create(4, 4), true);
         assert_ne!(board, default_board());
-        let board2 = board.place_wall(point::create(4,4 ), false);
+        let board2 = board.place_wall(point::create(4, 4), false);
         assert_eq!(board, board2);
-
-
     }
 }

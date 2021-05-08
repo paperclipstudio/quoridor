@@ -66,7 +66,7 @@ impl Board {
         return self.pawns[0].location.y == 8 || self.pawns[1].location.y == 0;
     }
 
-    fn is_pawn(&self, point:Point) -> bool {
+    fn is_pawn(&self, point: Point) -> bool {
         for p in self.pawns.iter() {
             if p.location == point {
                 return true;
@@ -93,13 +93,24 @@ impl Board {
             location: point,
             vertical,
         };
-        if self.next_wall() < MAX_WALLS && self.valid_wall_location(new_wall) {
-            self.walls[self.next_wall()] = new_wall;
-            self.walls_used[self.turn] += 1;
-            return self.inc_turn();
+
+        // Check if player has used all walls then nothing changes
+        if self.walls_left(self.turn) <= 0 {
+            return self;
         }
-        // Wall couldn't be placed, nothing changed
-        return self;
+
+        if !self.valid_wall_location(new_wall) {
+            return self;
+        }
+
+        // Check to see if all walls have been used
+        if self.next_wall() >= MAX_WALLS {
+            return self;
+        }
+
+        self.walls[self.next_wall()] = new_wall;
+        self.walls_used[self.turn] += 1;
+        return self.inc_turn();
     }
 
     fn inc_turn(mut self) -> Board {
@@ -126,7 +137,7 @@ impl Board {
     }
 
     fn walls_left(&self, player: usize) -> i32 {
-        return self.walls_used[player] as i32;
+        return (USER_STARTING_WALLS - self.walls_used[player]) as i32;
     }
 
     fn can_move(self, point: point::Point, direction: Direction) -> bool {
@@ -239,22 +250,21 @@ impl ToString for Board {
         let walls_left = format!(
             "Player 1 walls: {}    Player 2 walls: {} \n\n",
             self.walls_left(0),
-            self.walls_left(1) );
+            self.walls_left(1)
+        );
 
         result += &walls_left;
 
         // Add current player turn
-        let player_turn = 
-            "Current player's turn: ".to_owned() 
-            + (self.turn + 1).to_string().as_str()
-            + "\n\n";
+        let player_turn =
+            "Current player's turn: ".to_owned() + (self.turn + 1).to_string().as_str() + "\n\n";
 
         result = player_turn + &result;
 
         // Add a blank line to bottom
 
         result += "\n";
-        
+
         return result;
     }
 }

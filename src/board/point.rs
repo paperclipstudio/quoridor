@@ -26,8 +26,7 @@ impl Point {
             Up => self.shift(0, 1),
             Right => self.shift(1,0),
             Down => self.shift(0, -1),
-            Left => self.shift(1, 0),
-            _ => panic!("Invalid direction")
+            Left => self.shift(1, 0)
         }
     }
 

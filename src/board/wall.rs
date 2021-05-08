@@ -20,31 +20,33 @@ impl Wall {
         if self.location == other.location {
             return true;
         }
-
+        
+        // If they are not the same location and different rotations
+        // then they can't clash
         if self.vertical != other.vertical {
             return false;
         }
 
         if self.location.y == other.location.y {
-            // One wall is above other
-            if !self.vertical { 
-                return true; 
+            // One wall is too the right of the other
+            if self.vertical { 
+                return false; 
             }
             let x_distance = self.location.x - other.location.x;
            if x_distance == 1 || x_distance == -1 {
-               return false;
+               return true;
            } 
         }
 
         if self.location.x == other.location.x {
-            // One wall is too the right of the other
-            if self.vertical {
-                return true;
+            // One wall is above other
+            if !self.vertical {
+                return false;
             }
 
             let y_distance = self.location.y - other.location.y;
             if y_distance == 1 || y_distance == -1 {
-                return false; } }
+                return true; } }
 
         return false;
     }
@@ -83,6 +85,10 @@ mod tests {
         assert!(wall_a.clashes(wall_b));
         assert!(wall_b.clashes(wall_a));
 
+        wall_b.location = point::create(6, 4);
+
+        assert!(!wall_a.clashes(wall_b));
+        assert!(!wall_b.clashes(wall_a));
 
     }
 }

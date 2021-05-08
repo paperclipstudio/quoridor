@@ -23,7 +23,8 @@ const PAWN_TEXT: &str = "😎";
 const GAP_TEXT: &str = "⭕";
 const WALL_TEXT: &str = "❌";
 const NO_WALL_TEXT: &str = "  ";
-const MAX_WALLS: usize = 20;
+const USER_STARTING_WALLS: usize = 10;
+const MAX_WALLS: usize = USER_STARTING_WALLS * 2;
 
 /// One complete game state
 #[derive(Clone, Copy, Debug)]
@@ -47,6 +48,8 @@ impl Board {
         if !self.can_move(self.pawns[self.turn].location, direction) {
             return self;
         }
+
+        // TODO add complex pawn hop for when a wall is blocking the hop
 
         // Check for Pawn hop
         if self.is_pawn(self.pawns[self.turn].location.shift_direction(direction)) {
@@ -120,6 +123,10 @@ impl Board {
             }
         }
         return false;
+    }
+
+    fn walls_left(&self, player: usize) -> i32 {
+        return self.walls_used[player] as i32;
     }
 
     fn can_move(self, point: point::Point, direction: Direction) -> bool {
@@ -226,6 +233,15 @@ impl ToString for Board {
 
         result = result + &labels;
         result += "\n";
+
+        // Add amount of walls remaining
+
+        let walls_left = format!(
+            "Player 1 walls: {}    Player 2 walls: {} \n\n",
+            self.walls_left(0),
+            self.walls_left(1) );
+
+        result += &walls_left;
 
         // Add current player turn
         let player_turn = 

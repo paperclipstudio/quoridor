@@ -47,6 +47,11 @@ impl Board {
         if !self.can_move(self.pawns[self.turn].location, direction) {
             return self;
         }
+
+        // Check for Pawn hop
+        if self.is_pawn(self.pawns[self.turn].location.shift_direction(direction)) {
+            self.pawns[self.turn] = self.pawns[self.turn].move_to(direction);
+        }
         self.pawns[self.turn] = self.pawns[self.turn].move_to(direction);
 
         self.turn = (self.turn + 1) % self.pawns.len();
@@ -56,6 +61,15 @@ impl Board {
     // Returns true if any Pawn in is in a winning state
     pub fn is_won(self) -> bool {
         return self.pawns[0].location.y == 8 || self.pawns[1].location.y == 0;
+    }
+
+    fn is_pawn(&self, point:Point) -> bool {
+        for p in self.pawns.iter() {
+            if p.location == point {
+                return true;
+            }
+        }
+        return false;
     }
 
     fn next_wall(&self) -> usize {

@@ -111,11 +111,9 @@ impl Board {
     fn can_move(self, point: point::Point, direction: Direction) -> bool {
         // Find out if moves off of board
         let move_to = point.shift_direction(direction);
-        if move_to.x < 0 || move_to.x >= self.width 
-        || move_to.y < 0 || move_to.y >= self.height {
+        if move_to.x < 0 || move_to.x >= self.width || move_to.y < 0 || move_to.y >= self.height {
             return false;
         }
-
 
         let point1: Point;
         let point2: Point;
@@ -168,16 +166,16 @@ impl ToString for Board {
                 } else {
                     GAP_TEXT
                 };
-                line += if !self.can_move(here, Right) {
-                    WALL_TEXT
-                } else {
-                    NO_WALL_TEXT
-                };
+                if x != self.width - 1 {
+                    line += if !self.can_move(here, Right) {
+                        WALL_TEXT
+                    } else {
+                        NO_WALL_TEXT
+                    };
+                }
             }
             line += "\n";
-            if y == 8 {
-                //continue;
-            }
+
             // Add Row Letters
             result = line + &result;
 
@@ -187,7 +185,6 @@ impl ToString for Board {
             line2.push(' ');
             for x in 0..self.height {
                 let here = create(x, y);
-
                 line2 += if !self.can_move(here, Up) {
                     WALL_TEXT
                 } else {
@@ -200,7 +197,9 @@ impl ToString for Board {
                 };
             }
             line2.push('\n');
-            result = line2 + &result;
+            if y != self.height - 1 {
+                result = line2 + &result;
+            }
         }
 
         // Add Column numbers
@@ -214,6 +213,18 @@ impl ToString for Board {
         result = result + &labels;
         result += "\n";
 
+        // Add current player turn
+        let player_turn = 
+            "Current player's turn: ".to_owned() 
+            + (self.turn + 1).to_string().as_str()
+            + "\n\n";
+
+        result = player_turn + &result;
+
+        // Add a blank line to bottom
+
+        result += "\n";
+        
         return result;
     }
 }

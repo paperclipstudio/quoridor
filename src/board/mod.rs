@@ -142,7 +142,6 @@ impl Board {
                 continue;
             }
             if wall.location == point1 || wall.location == point2 {
-                println!("{:#?}", wall.location);
                 return false;
             }
         }

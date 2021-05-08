@@ -40,7 +40,7 @@ impl Board {
     /// Moves a player pawn in a direction
     /// return true if that move is valid and was applied
     pub fn move_pawn(mut self, direction: Direction) -> Board {
-        if self.pawns.len() >= self.turn {
+        if self.pawns.len() <= self.turn {
             // Invalid pawn index
             return self;
         }
@@ -114,6 +114,7 @@ impl Board {
         let point1: Point;
         let point2: Point;
         let vertical: bool;
+        // Get points which a blocking wall could be
         match direction {
             Up => {
                 point1 = point;
@@ -141,10 +142,11 @@ impl Board {
                 continue;
             }
             if wall.location == point1 || wall.location == point2 {
-                return true;
+                println!("{:#?}", wall.location);
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }
 
@@ -161,7 +163,7 @@ impl ToString for Board {
                 } else {
                     GAP_TEXT
                 };
-                line += if self.can_move(here, Right) {
+                line += if !self.can_move(here, Right) {
                     WALL_TEXT
                 } else {
                     NO_WALL_TEXT
@@ -181,7 +183,7 @@ impl ToString for Board {
             for x in 0..self.height {
                 let here = create(x, y);
 
-                line2 += if self.can_move(here, Up) {
+                line2 += if !self.can_move(here, Up) {
                     WALL_TEXT
                 } else {
                     NO_WALL_TEXT

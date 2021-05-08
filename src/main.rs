@@ -32,13 +32,18 @@ fn turn(board: Board) -> Board {
             1 => place_wall(board),
             _ => invalid_input(board),
         };
-    } else {
-        println!("You didn't select anything!");
     }
+
+    println!("You didn't select anything!");
     return board;
 }
 
 fn invalid_input(board: Board) -> Board {
+    Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Invalid Choice")
+        .items(&["Sorry"])
+        .interact_opt()
+        .unwrap();
     return board;
 }
 

@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 dialoguer = "0.8.0"
+priority-queue = "1.1.1"

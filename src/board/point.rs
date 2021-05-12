@@ -1,7 +1,7 @@
 
 type Row = i32;
 type Col = i32;
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Hash, Eq)]
 pub struct Point {
     pub x: Col,
     pub y: Row,

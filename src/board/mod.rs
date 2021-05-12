@@ -2,6 +2,7 @@
 mod pawn;
 pub mod point;
 mod wall;
+mod path_finder;
 
 use pawn::Pawn;
 use point::Point;
@@ -89,6 +90,12 @@ impl Board {
     }
 
     pub fn place_wall(mut self, point: Point, vertical: bool) -> Board {
+        //use path_finder::PathFinder;
+        /*
+        let pf = PathFinder{
+            board: self
+        };
+        */
         let new_wall = Wall {
             location: point,
             vertical,

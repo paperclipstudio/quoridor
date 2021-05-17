@@ -1,14 +1,14 @@
-use super::point;
+use crate::game::point::*;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Wall {
-    pub location: point::Point,
+    pub location: Point,
     pub vertical: bool
 }
 
 pub fn default_wall() -> Wall {
     return Wall {
-        location: point::create(-1 , -1),
+        location: create(-1 , -1),
         vertical: false,
     };
 }
@@ -61,21 +61,21 @@ mod tests {
     #[test]
     fn wall_clashes() {
         let mut wall_a = default_wall();
-        wall_a.location = point::create(4,4);
+        wall_a.location = create(4,4);
         wall_a.vertical = true;
 
         let mut wall_b = default_wall();
-        wall_b.location = point::create(4,4);
+        wall_b.location = create(4,4);
         wall_b.vertical = true;
 
         assert!(wall_a.clashes(wall_b));
         assert!(wall_b.clashes(wall_a));
 
-        wall_b.location = point::create(4,5);
+        wall_b.location = create(4,5);
         assert!(wall_a.clashes(wall_b));
         assert!(wall_b.clashes(wall_a));
 
-        wall_b.location = point::create(5,4);
+        wall_b.location = create(5,4);
         assert!(!wall_a.clashes(wall_b));
         assert!(!wall_b.clashes(wall_a));
 
@@ -85,7 +85,7 @@ mod tests {
         assert!(wall_a.clashes(wall_b));
         assert!(wall_b.clashes(wall_a));
 
-        wall_b.location = point::create(6, 4);
+        wall_b.location = create(6, 4);
 
         assert!(!wall_a.clashes(wall_b));
         assert!(!wall_b.clashes(wall_a));

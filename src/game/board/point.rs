@@ -33,6 +33,8 @@ impl Point {
     pub fn origin() -> Point {
         return create(0, 0);
     }
+
+    
 }
 
 impl PartialEq for Point {

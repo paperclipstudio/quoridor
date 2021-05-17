@@ -1,14 +1,15 @@
 //#![crate_name = "Quoridor Game"]
+pub mod game_save;
+pub mod path_finder;
 mod pawn;
 pub mod point;
 mod wall;
-mod path_finder;
 
 use pawn::Pawn;
 use point::Point;
 use wall::Wall;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Direction {
     Up,
     Down,
@@ -28,7 +29,7 @@ const USER_STARTING_WALLS: usize = 10;
 const MAX_WALLS: usize = USER_STARTING_WALLS * 2;
 
 /// One complete game state
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub struct Board {
     width: i32,
     height: i32,
@@ -39,6 +40,14 @@ pub struct Board {
 }
 
 impl Board {
+
+    pub fn player_distance(self, player: usize) -> i32 {
+        use self::path_finder::*;
+        let pf = path_finder::PathFinder { board: self };
+        let result = pf.distance_to_goal(self.pawns[player].location, 7);
+        return result.unwrap_or(-1);
+    }
+
     /// Moves a player pawn in a direction
     /// return true if that move is valid and was applied
     pub fn move_pawn(mut self, direction: Direction) -> Board {
@@ -59,6 +68,7 @@ impl Board {
         self.pawns[self.turn] = self.pawns[self.turn].move_to(direction);
 
         self.turn = (self.turn + 1) % self.pawns.len();
+
         return self;
     }
 
@@ -267,6 +277,11 @@ impl ToString for Board {
             "Current player's turn: ".to_owned() + (self.turn + 1).to_string().as_str() + "\n\n";
 
         result = player_turn + &result;
+
+        // Add player one distance from goal
+        result += "player one distance";
+        result.push_str(self.player_distance(0).to_string().as_str());
+        result += "\n";
 
         // Add a blank line to bottom
 

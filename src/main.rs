@@ -1,4 +1,4 @@
-mod board_test;
+mod board;
 
 fn main() {
     println!("Hello world");

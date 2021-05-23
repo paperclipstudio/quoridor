@@ -17,7 +17,7 @@ pub enum Wall {
     None,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Direction {
     Up,
     Right,

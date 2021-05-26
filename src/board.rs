@@ -46,10 +46,10 @@ impl Board {
 
     pub fn create_default() -> Board {
         return Board::create()
-            .set_height(9)
-            .set_width(9)
-            .set_pawn(0, (4, 0))
-            .set_pawn(1, (4, 8));
+                    .set_height(9)
+                    .set_width(9)
+                    .set_pawn(0, (4, 0))
+                    .set_pawn(1, (4, 8));
     }
 
     pub fn set_width(mut self, width: i32) -> Board {
@@ -84,6 +84,25 @@ impl Board {
 
     pub fn can_move(self, pawn_index: i8, direction: Direction) -> bool {
         let (x, y) = self.pawns[pawn_index as usize];
+        // Check to see if pawn will move off board
+        let (new_x, new_y) = match direction {
+            Up => (x, y+1),
+            Right => (x+1, y),
+            Down => (x, y-1),
+            Left => (x-1, y)
+        };
+
+        if new_x < 0 || new_x >= self.width {
+            return false;
+        }
+
+
+        if new_y < 0 || new_y >= self.height {
+            return false;
+        }
+
+        // Check to see if trying to walk though walls
+
         let orientation = if direction == Up || direction == Down {
             Orientation::Horizontal
         } else {
@@ -101,6 +120,8 @@ impl Board {
         } else {
             (x, y - 1)
         };
+
+
 
         return !(self.has_wall(wall_location1, orientation)
             || self.has_wall(wall_location2, orientation));
@@ -167,7 +188,7 @@ impl Board {
         return self;
     }
 
-    fn has_wall(self, location: Point, orientation: Orientation) -> bool {
+    pub fn has_wall(self, location: Point, orientation: Orientation) -> bool {
         for wall in self.walls.iter() {
             match wall {
                 Wall::None => continue,
@@ -180,9 +201,20 @@ impl Board {
         }
         return false;
     }
+
+    pub fn is_pawn(&self, location:&Point) -> bool {
+        for pawn in self.pawns.iter() {
+            if pawn == location {
+                return true;
+            }
+        }
+
+        return false;
+
+    }
 }
 
-#[cfg(test)]
+//#[cfg(test)]
 mod test {
     use super::*;
     #[test]
@@ -345,6 +377,24 @@ mod test {
 
         let board = start_board.place_wall((5, 4), Orientation::Horizontal);
         assert!(!board.can_move(0, Down));
+    }
+
+    #[test]
+    fn test_can_move() {
+        let mut board = Board::create_default();
+        assert!(!board.can_move(0, Down));
+        assert!(board.can_move(0, Up));
+        assert!(!board.can_move(1, Up));
+        assert!(board.can_move(1, Down));
+
+        board = board.set_pawn(0, (0, 0));
+        assert!(!board.can_move(0, Left));
+        assert!(!board.can_move(0, Down));
+        assert!(board.can_move(0, Up));
+        assert!(board.can_move(0, Right));
+
+
+
     }
     
 }

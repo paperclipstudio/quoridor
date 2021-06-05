@@ -38,7 +38,7 @@ fn start_game() {
         if let Some(selection) = selection {
             match selection {
                 0 => move_pawn(&mut game),
-                1 => place_wall(game),
+                1 => place_wall(&game),
                 _ => invalid_input(),
             };
         }
@@ -47,7 +47,7 @@ fn start_game() {
     println!("Well done some one won");
 }
 
-fn move_pawn(&mut game: &mut game::Quoridor) {
+fn move_pawn(game: &mut game::Quoridor) {
     use board::Direction::*;
     use game::Turn::*;
 
@@ -85,7 +85,7 @@ fn move_pawn(&mut game: &mut game::Quoridor) {
     }
 }
 
-fn place_wall(game: game::Quoridor) {}
+fn place_wall(game: &game::Quoridor) {}
 
 fn invalid_input() {
     println!("invalid move");

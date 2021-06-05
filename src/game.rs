@@ -86,28 +86,10 @@ impl Quoridor {
 
     pub fn to_string(&self) -> String {
         let mut result = String::new();
-        // Create Empty board
         for not_y in 0..self.board.get_height() {
-            let y = self.board.get_width() - not_y;
-            for x in 0..self.board.get_width() {
-                if self.pawn_at((x, y)) {
-                    result.push_str("P")
-                } else {
-                    result.push_str("*");
+            let y = self.board.get_height() - not_y - 1;
 
-                }
-                if x != self.board.get_width() - 1 {
-                    if self.board.has_wall((x, y-1), Orientation::Vertical)
-                        || self.board.has_wall((x,y), Orientation::Vertical)
-                    {
-                        result.push_str("O")
-                    } else {
-                        result.push_str(" ");
-                    }
-                }
-            }
-
-            result.push_str("\n");
+            // Add wall row 
             for x in 0..self.board.get_width() {
                 if self.board.has_wall((x - 1, y), Orientation::Horizontal)
                     || self.board.has_wall((x, y), Orientation::Horizontal)
@@ -124,7 +106,29 @@ impl Quoridor {
                     result.push_str("-")
                 }
             }
+
             result.push_str("\n");
+            for x in 0..self.board.get_width() {
+                // Add a squares row
+                if self.pawn_at((x, y)) {
+                    result.push_str("P")
+                } else {
+                    result.push_str("*");
+                }
+                if x != self.board.get_width() - 1 {
+                    if self.board.has_wall((x, y-1), Orientation::Vertical)
+                        || self.board.has_wall((x,y), Orientation::Vertical)
+                    {
+                        result.push_str("O")
+                    } else {
+                        result.push_str(" ");
+                    }
+                }
+            }
+
+            
+            result.push_str("\n");
+            
         }
 
         return result;

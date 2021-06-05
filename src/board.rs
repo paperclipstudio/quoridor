@@ -160,22 +160,24 @@ impl Board {
         for wall in self.walls.iter() {
             match wall {
                 Wall::Wall((w_x, w_y), w_orient) => {
+                    // If they have the same center then they clash
                     if *w_x == x && *w_y == y {
                         return self;
                     }
 
-                    // If they are not in the same location
+                    // If they do not have the same center 
                     // Then having different orientations
                     // means that they can't be interfering
                     if orientation != *w_orient {
                         continue;
                     }
 
-                    if (x - 1 == *w_x || x + 1 == *w_x) && orientation == Orientation::Horizontal {
+
+                    if (x - 1 == *w_x || x + 1 == *w_x) && y == *w_y && orientation == Orientation::Horizontal {
                         return self;
                     }
 
-                    if (y - 1 == *w_y || y + 1 == *w_y) && orientation == Orientation::Vertical {
+                    if (y - 1 == *w_y || y + 1 == *w_y) && x == *w_x && orientation == Orientation::Vertical {
                         return self;
                     }
                 }
@@ -214,7 +216,7 @@ impl Board {
     }
 }
 
-//#[cfg(test)]
+#[cfg(test)]
 mod test {
     use super::*;
     #[test]
@@ -392,9 +394,21 @@ mod test {
         assert!(!board.can_move(0, Down));
         assert!(board.can_move(0, Up));
         assert!(board.can_move(0, Right));
+    }
+
+    #[test]
+    fn edge_case_wall_placement() {
+        let board = Board::create_default()
+            .place_wall((0,0), Orientation::Vertical)
+            .place_wall((1,1), Orientation::Vertical);
+
+        assert!(board.has_wall((0,0), Orientation::Vertical));
+        assert!(board.has_wall((1,1), Orientation::Vertical));
 
 
+        
 
+    
     }
     
 }

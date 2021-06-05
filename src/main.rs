@@ -6,7 +6,6 @@ use std::process::Command;
 
 fn main() {
     start_game();
-
 }
 
 fn clear_screen() {
@@ -19,6 +18,7 @@ fn start_game() {
     game.play(game::Turn::PlaceWall((5,4), board::Orientation::Horizontal));
     game.play(game::Turn::PlaceWall((0,0), board::Orientation::Vertical));
     game.play(game::Turn::PlaceWall((1,1), board::Orientation::Vertical));
+    game.play(game::Turn::PlaceWall((2,2), board::Orientation::Vertical));
     while !game.has_won() {
         clear_screen();
         println!("Quoridor Game");
@@ -32,6 +32,4 @@ fn start_game() {
             .interact_opt()
             .unwrap();
     }
-
-
 }

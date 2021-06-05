@@ -1,10 +1,11 @@
 mod board;
 mod game;
-use dialoguer::{theme::ColorfulTheme, Select, Input};
+use dialoguer::{theme::ColorfulTheme, Input, Select};
+use game::{Turn, Turn::*};
 
 use std::process::Command;
 
-use crate::board::Orientation;
+use crate::board::{Direction, Orientation};
 
 fn main() {
     start_game();
@@ -37,19 +38,22 @@ fn start_game() {
             .interact_opt()
             .unwrap();
 
+        let mut turn: Turn = MovePawn(Direction::Down);
+
         if let Some(selection) = selection {
-            match selection {
+            turn = match selection {
                 0 => move_pawn(&mut game),
-                1 => place_wall(&mut game),
+                1 => place_wall(),
                 _ => invalid_input(),
             };
         }
+        game.play(turn);
         println!("Turn finished");
     }
     println!("Well done some one won");
 }
 
-fn move_pawn(game: &mut game::Quoridor) {
+fn move_pawn(game: &mut game::Quoridor) -> Turn {
     use board::Direction::*;
     use game::Turn::*;
 
@@ -77,53 +81,52 @@ fn move_pawn(game: &mut game::Quoridor) {
         if selection >= directions.len() {
             invalid_input();
         }
-        println!("Moved");
 
-        let turn = MovePawn(directions[selection]);
-
-        game.play(turn);
+        return MovePawn(directions[selection]);
     } else {
-        invalid_input();
+        return invalid_input();
     }
 }
 
-fn place_wall(game: &mut game::Quoridor) {
+fn place_wall() -> Turn {
     let direction_choice = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("Which direction?")
-            .items(&["Vertical", "Horizontal"])
-            .interact_opt()
-            .unwrap();
-        let selection: String = Input::with_theme(&ColorfulTheme::default())
-            .with_prompt("Select Location")
-            .validate_with(|in_text: &String| -> Result<(), &str> {
-                let input = in_text.to_ascii_uppercase();
-                if input.len() != 2 {
-                    return Err("invalid Length");
-                }
-                if !(input.chars().nth(0).unwrap() >= 'A' && input.chars().nth(0).unwrap() <= 'I') {
-                    return Err("invalid first char");
-                }
-                if !(input.chars().nth(1).unwrap() >= '1' && input.chars().nth(1).unwrap() <= '9') {
-                    return Err("invalid second char");
-                }
-                Ok(())
-            })
-            .interact_text()
-            .unwrap()
-            .to_ascii_uppercase();
-        let col: i32 = selection.chars().nth(0).unwrap() as i32 - 'A' as i32;
-        let row: i32 = selection.chars().nth(1).unwrap() as i32 - '1' as i32;
-        use game::Turn::*;
-        let mut direction = Orientation::Horizontal;
-        match direction_choice {
-            None => return,
-            Some(x) => if x == 0 {direction = Orientation::Vertical}
-        }
-        let turn = PlaceWall((col, row), direction);
-        game.play(turn);
-        return;
+        .with_prompt("Which direction?")
+        .items(&["Vertical", "Horizontal", "back"])
+        .interact_opt()
+        .unwrap();
+    let selection: String = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select Location")
+        .validate_with(|in_text: &String| -> Result<(), &str> {
+            let input = in_text.to_ascii_uppercase();
+            if input.len() != 2 {
+                return Err("invalid Length");
+            }
+            if !(input.chars().nth(0).unwrap() >= 'A' && input.chars().nth(0).unwrap() <= 'I') {
+                return Err("invalid first char");
+            }
+            if !(input.chars().nth(1).unwrap() >= '1' && input.chars().nth(1).unwrap() <= '9') {
+                return Err("invalid second char");
+            }
+            Ok(())
+        })
+        .interact_text()
+        .unwrap()
+        .to_ascii_uppercase();
+    let col: i32 = selection.chars().nth(0).unwrap() as i32 - 'A' as i32;
+    let row: i32 = selection.chars().nth(1).unwrap() as i32 - '1' as i32;
+    use game::Turn::*;
+    let mut direction = Orientation::Horizontal;
+
+    match direction_choice {
+        Some(0) => direction = Orientation::Vertical,
+        Some(1) => direction = Orientation::Horizontal,
+        Some(2) => return invalid_input(),
+        _ => (),
+    }
+    return PlaceWall((col, row), direction);
 }
 
-fn invalid_input() {
+fn invalid_input() -> Turn {
     println!("invalid move");
+    return MovePawn(Direction::Up);
 }

@@ -1,8 +1,10 @@
 mod board;
 mod game;
-use dialoguer::{theme::ColorfulTheme, Select};
+use dialoguer::{theme::ColorfulTheme, Select, Input};
 
 use std::process::Command;
+
+use crate::board::Orientation;
 
 fn main() {
     start_game();
@@ -38,7 +40,7 @@ fn start_game() {
         if let Some(selection) = selection {
             match selection {
                 0 => move_pawn(&mut game),
-                1 => place_wall(&game),
+                1 => place_wall(&mut game),
                 _ => invalid_input(),
             };
         }
@@ -85,7 +87,42 @@ fn move_pawn(game: &mut game::Quoridor) {
     }
 }
 
-fn place_wall(_game: &game::Quoridor) {}
+fn place_wall(game: &mut game::Quoridor) {
+    let direction_choice = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Which direction?")
+            .items(&["Vertical", "Horizontal"])
+            .interact_opt()
+            .unwrap();
+        let selection: String = Input::with_theme(&ColorfulTheme::default())
+            .with_prompt("Select Location")
+            .validate_with(|in_text: &String| -> Result<(), &str> {
+                let input = in_text.to_ascii_uppercase();
+                if input.len() != 2 {
+                    return Err("invalid Length");
+                }
+                if !(input.chars().nth(0).unwrap() >= 'A' && input.chars().nth(0).unwrap() <= 'I') {
+                    return Err("invalid first char");
+                }
+                if !(input.chars().nth(1).unwrap() >= '1' && input.chars().nth(1).unwrap() <= '9') {
+                    return Err("invalid second char");
+                }
+                Ok(())
+            })
+            .interact_text()
+            .unwrap()
+            .to_ascii_uppercase();
+        let col: i32 = selection.chars().nth(0).unwrap() as i32 - 'A' as i32;
+        let row: i32 = selection.chars().nth(1).unwrap() as i32 - '1' as i32;
+        use game::Turn::*;
+        let mut direction = Orientation::Horizontal;
+        match direction_choice {
+            None => return,
+            Some(x) => if x == 0 {direction = Orientation::Vertical}
+        }
+        let turn = PlaceWall((col, row), direction);
+        game.play(turn);
+        return;
+}
 
 fn invalid_input() {
     println!("invalid move");

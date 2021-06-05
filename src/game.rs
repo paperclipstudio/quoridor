@@ -84,6 +84,10 @@ impl Quoridor {
         };
     }
 
+    pub fn can_move(&self, direction: Direction) -> bool {
+        return self.board.can_move(self.current_player() as i8, direction);
+    }
+
     pub fn to_string(&self) -> String {
         let mut result = String::new();
         for not_y in 0..self.board.get_height() {

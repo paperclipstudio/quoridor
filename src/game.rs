@@ -1,11 +1,9 @@
 #![allow(dead_code)]
-use std::ops::Range;
 
 use crate::board::Board;
 use crate::board::Direction;
 use crate::board::Orientation;
 use crate::board::Point;
-use dialoguer::*;
 
 pub enum Turn {
     PlaceWall(Point, Orientation),
@@ -74,6 +72,7 @@ impl Quoridor {
                 if !self.board.can_move(self.current_player() as i8, direction) {
                     return false;
                 }
+                self.board = self.board.move_pawn(self.current_player() as i8, direction);
 
                 true
             }

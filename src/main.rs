@@ -1,6 +1,6 @@
 mod board;
 mod game;
-use dialoguer::{theme::ColorfulTheme, Input, Select};
+use dialoguer::{theme::ColorfulTheme, Select};
 
 use std::process::Command;
 
@@ -85,7 +85,7 @@ fn move_pawn(game: &mut game::Quoridor) {
     }
 }
 
-fn place_wall(game: &game::Quoridor) {}
+fn place_wall(_game: &game::Quoridor) {}
 
 fn invalid_input() {
     println!("invalid move");

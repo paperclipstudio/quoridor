@@ -1,11 +1,11 @@
 mod board;
 mod game;
 use dialoguer::{theme::ColorfulTheme, Input, Select};
-use game::{Turn, Turn::*};
+use game::{Quoridor, Turn, Turn::*};
 
 use std::process::Command;
 
-use crate::board::{Direction, Orientation};
+use crate::board::{Direction, Direction::*, Orientation};
 
 fn main() {
     start_game();
@@ -16,48 +16,44 @@ fn clear_screen() {
 }
 
 fn start_game() {
-    let mut game = game::Quoridor::new_two_player();
-    game.play(game::Turn::PlaceWall((3, 7), board::Orientation::Vertical));
-    game.play(game::Turn::PlaceWall(
-        (5, 4),
-        board::Orientation::Horizontal,
-    ));
-    game.play(game::Turn::PlaceWall((0, 0), board::Orientation::Vertical));
-    game.play(game::Turn::PlaceWall((1, 1), board::Orientation::Vertical));
-    game.play(game::Turn::PlaceWall((2, 2), board::Orientation::Vertical));
+    let mut game = Quoridor::new_two_player();
     while !game.has_won() {
-        clear_screen();
-        println!("Quoridor Game");
-        print!("{}", game.to_string());
-        let items = vec!["Move Pawn", "Place Wall"];
-        let selection = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("What would you like to do?")
-            .clear(true)
-            .default(0)
-            .items(&items[..])
-            .interact_opt()
-            .unwrap();
-
-        let mut turn: Turn = MovePawn(Direction::Down);
-
-        if let Some(selection) = selection {
-            turn = match selection {
-                0 => move_pawn(&mut game),
-                1 => place_wall(),
-                _ => invalid_input(),
-            };
+        let turn = get_turn(&mut game);
+        if game.is_valid(turn) {
+            game.play(turn);
+        } else {
+            invalid_input(&game);
         }
-        game.play(turn);
-        println!("Turn finished");
     }
     println!("Well done some one won");
 }
 
-fn move_pawn(game: &mut game::Quoridor) -> Turn {
-    use board::Direction::*;
-    use game::Turn::*;
+fn get_turn(game: &game::Quoridor) -> Turn {
+    clear_screen();
+    println!("Quoridor Game");
+    print!("{}", game.to_string());
+    let items = vec!["Move Pawn", "Place Wall"];
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("What would you like to do?")
+        .clear(true)
+        .default(0)
+        .items(&items[..])
+        .interact_opt()
+        .unwrap();
 
-    let directions: Vec<board::Direction> = vec![Up, Right, Down, Left]
+    let turn: Turn;
+
+    turn = match selection {
+        Some(0) => move_pawn(game),
+        Some(1) => place_wall(game),
+        _ => invalid_input(game),
+    };
+
+    return turn;
+}
+
+fn move_pawn(game: &game::Quoridor) -> Turn {
+    let directions: Vec<Direction> = vec![Up, Right, Down, Left]
         .iter()
         .filter(|x| game.can_move(**x))
         .map(|x| *x)
@@ -79,21 +75,31 @@ fn move_pawn(game: &mut game::Quoridor) -> Turn {
 
     if let Some(selection) = selection {
         if selection >= directions.len() {
-            invalid_input();
+            invalid_input(game);
         }
 
         return MovePawn(directions[selection]);
     } else {
-        return invalid_input();
+        return invalid_input(game);
     }
 }
 
-fn place_wall() -> Turn {
+fn place_wall(game: &game::Quoridor) -> Turn {
     let direction_choice = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Which direction?")
         .items(&["Vertical", "Horizontal", "back"])
         .interact_opt()
         .unwrap();
+
+    let mut direction = Orientation::Horizontal;
+
+    match direction_choice {
+        Some(0) => direction = Orientation::Vertical,
+        Some(1) => direction = Orientation::Horizontal,
+        Some(2) => return get_turn(game),
+        _ => (),
+    }
+
     let selection: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Select Location")
         .validate_with(|in_text: &String| -> Result<(), &str> {
@@ -112,21 +118,20 @@ fn place_wall() -> Turn {
         .interact_text()
         .unwrap()
         .to_ascii_uppercase();
+
     let col: i32 = selection.chars().nth(0).unwrap() as i32 - 'A' as i32;
     let row: i32 = selection.chars().nth(1).unwrap() as i32 - '1' as i32;
-    use game::Turn::*;
-    let mut direction = Orientation::Horizontal;
-
-    match direction_choice {
-        Some(0) => direction = Orientation::Vertical,
-        Some(1) => direction = Orientation::Horizontal,
-        Some(2) => return invalid_input(),
-        _ => (),
-    }
     return PlaceWall((col, row), direction);
 }
 
-fn invalid_input() -> Turn {
-    println!("invalid move");
-    return MovePawn(Direction::Up);
+fn invalid_input(_game: &game::Quoridor) -> Turn {
+    let message: String = String::from("Invalid input: "); // + reason.as_str();
+    let items = vec!["Conintue"];
+    let _wait_for_input = dialoguer::Select::with_theme(&ColorfulTheme::default())
+        .with_prompt(message)
+        .items(&items)
+        .interact()
+        .unwrap();
+    // TODO add a invalid turn type that does nothing.
+    return PlaceWall((-1, -1), Orientation::Vertical);
 }

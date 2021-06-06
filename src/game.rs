@@ -5,6 +5,7 @@ use crate::board::Direction;
 use crate::board::Orientation;
 use crate::board::Point;
 
+#[derive(Clone, Copy)]
 pub enum Turn {
     PlaceWall(Point, Orientation),
     MovePawn(Direction),
@@ -57,7 +58,6 @@ impl Quoridor {
     fn move_pawn(&mut self, direction: Direction) {
         self.board = self.board.move_pawn(self.current_player as i8, direction);
         self.current_player = (self.current_player + 1) % 2;
-        return;
     }
 
     pub fn has_won(&self) -> bool {
@@ -85,6 +85,14 @@ impl Quoridor {
 
     pub fn can_move(&self, direction: Direction) -> bool {
         return self.board.can_move(self.current_player() as i8, direction);
+    }
+
+    pub fn is_valid(&self, turn: Turn) -> bool {
+        use Turn::*;
+        return match turn {
+            MovePawn(direction) => self.can_move(direction),
+            PlaceWall(location, orientation) => self.board.can_place_wall(location, orientation)
+        }
     }
 
     pub fn to_string(&self) -> String {

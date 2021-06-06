@@ -155,14 +155,20 @@ impl Board {
 
         return 0;
     }
+    
+    pub fn can_place_wall(&self, (x, y): Point, orientation: Orientation) -> bool {
+        // Check that wall is on the board
+        if !(x >= 0 && x < self.width && y >= 0 && y < self.height) {
+            return false;
+        }
 
-    pub fn place_wall(mut self, (x, y): Point, orientation: Orientation) -> Board {
+        // Check if wall would clash with any other wall
         for wall in self.walls.iter() {
             match wall {
                 Wall::Wall((w_x, w_y), w_orient) => {
                     // If they have the same center then they clash
                     if *w_x == x && *w_y == y {
-                        return self;
+                        return false;
                     }
 
                     // If they do not have the same center 
@@ -174,17 +180,23 @@ impl Board {
 
 
                     if (x - 1 == *w_x || x + 1 == *w_x) && y == *w_y && orientation == Orientation::Horizontal {
-                        return self;
+                        return false;
                     }
 
                     if (y - 1 == *w_y || y + 1 == *w_y) && x == *w_x && orientation == Orientation::Vertical {
-                        return self;
+                        continue;
                     }
-                }
-                Wall::None => continue
+                },
+                Wall::None => {continue}
             }
         }
-        if x >= 0 && x < self.width && y >= 0 && y < self.height {
+
+        return true;
+    }
+
+    pub fn place_wall(mut self, (x, y): Point, orientation: Orientation) -> Board {
+       
+        if self.can_place_wall((x,y), orientation) {
             self.walls[self.first_empty_wall()] = Wall::Wall((x, y), orientation);
         }
         return self;

@@ -1,5 +1,6 @@
 mod board;
 mod game;
+mod pathFinder;
 use dialoguer::{theme::ColorfulTheme, Input, Select};
 use game::{Quoridor, Turn, Turn::*};
 

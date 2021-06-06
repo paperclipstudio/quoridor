@@ -2,9 +2,6 @@
 
 ## Working on
 
-- Menu working correctly
+- Wall being able to block off path
 
 # Issues
-
-- Back buttons not working correctly
-- Wall being able to block off path

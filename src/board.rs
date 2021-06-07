@@ -1,8 +1,6 @@
 #![allow(dead_code)]
 
-/**
-Holds the state of one game board
- */
+
 pub type Point = (i32, i32);
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -168,7 +166,7 @@ impl Board {
 
     pub fn can_place_wall(&self, (x, y): Point, orientation: Orientation) -> bool {
         // Check that wall is on the board
-        if !(x >= 0 && x < self.width && y >= 0 && y < self.height) {
+        if !(x >= 0 && x < self.width-1 && y >= 0 && y < self.height-1) {
             return false;
         }
 
@@ -280,8 +278,6 @@ mod test {
         let board = Board::create().set_pawn(0, (5, 2));
 
         assert_eq!((5, 2), board.get_pawn(0).unwrap());
-
-        // TODO
     }
 
     #[test]

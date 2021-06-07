@@ -1,3 +1,4 @@
+
 #![allow(dead_code)]
 
 use crate::board::Board;
@@ -17,6 +18,7 @@ pub struct Quoridor {
 }
 
 impl Quoridor {
+    /// Creates a new two player game
     pub fn new_two_player() -> Quoridor {
         return Quoridor {
             board: Board::create_default(),
@@ -33,6 +35,10 @@ impl Quoridor {
         return self.current_player;
     }
 
+    fn next_turn(&mut self) {
+        self.current_player = self.current_player + 1 % 2;
+    }
+
     pub fn walls_left(&self, player: i32) -> i32 {
         if player < 0 || player > 1 {
             panic!("Invalid player index")
@@ -41,7 +47,10 @@ impl Quoridor {
     }
 
     fn place_wall(&mut self, location: Point, orientation: Orientation) {
+        self.walls_left[self.current_player() as usize] = self.walls_left[self.current_player() as usize] - 1;
         self.board = self.board.place_wall(location, orientation);
+        self.next_turn();
+
     }
 
     fn pawn(&self, player: i32) -> Point {
@@ -57,7 +66,7 @@ impl Quoridor {
 
     fn move_pawn(&mut self, direction: Direction) {
         self.board = self.board.move_pawn(self.current_player as i8, direction);
-        self.current_player = (self.current_player + 1) % 2;
+        self.next_turn();
     }
 
     pub fn has_won(&self) -> bool {
@@ -81,11 +90,19 @@ impl Quoridor {
         return self.board.pawn_can_move(self.current_player() as i8, direction);
     }
 
+    pub fn can_place_wall(&self, location:Point, orientation: Orientation) -> bool {
+        if self.walls_left[self.current_player() as usize] <= 0 {
+            return false;
+        } else {
+            return self.board.can_place_wall(location, orientation)
+        }
+    }
+
     pub fn is_valid(&self, turn: Turn) -> bool {
         use Turn::*;
         return match turn {
             MovePawn(direction) => self.can_move(direction),
-            PlaceWall(location, orientation) => self.board.can_place_wall(location, orientation)
+            PlaceWall(location, orientation) => self.can_place_wall(location, orientation)
         }
     }
 

@@ -1,3 +1,4 @@
+#![crate_name = "quoridor"]
 mod board;
 mod game;
 mod path_finder;

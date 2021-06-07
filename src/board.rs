@@ -25,6 +25,15 @@ pub enum Direction {
     Left,
 }
 
+pub fn shift((x, y): &Point, direction: Direction) -> Point {
+    return match direction {
+        Up => (*x, *y + 1),
+        Right => (*x + 1, *y),
+        Down => (*x, *y - 1),
+        Left => (*x - 1, *y),
+    };
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Board {
     width: i32,
@@ -46,10 +55,10 @@ impl Board {
 
     pub fn create_default() -> Board {
         return Board::create()
-                    .set_height(9)
-                    .set_width(9)
-                    .set_pawn(0, (4, 0))
-                    .set_pawn(1, (4, 8));
+            .set_height(9)
+            .set_width(9)
+            .set_pawn(0, (4, 0))
+            .set_pawn(1, (4, 8));
     }
 
     pub fn set_width(mut self, width: i32) -> Board {
@@ -82,20 +91,23 @@ impl Board {
         return None;
     }
 
-    pub fn can_move(self, pawn_index: i8, direction: Direction) -> bool {
-        let (x, y) = self.pawns[pawn_index as usize];
+    pub fn pawn_can_move(self, pawn_index: i8, direction: Direction) -> bool {
+        let point = self.pawns[pawn_index as usize];
+        return self.can_move_from(point, direction);
+    }
+
+    pub fn can_move_from(self, (x, y): Point, direction: Direction) -> bool {
         // Check to see if pawn will move off board
         let (new_x, new_y) = match direction {
-            Up => (x, y+1),
-            Right => (x+1, y),
-            Down => (x, y-1),
-            Left => (x-1, y)
+            Up => (x, y + 1),
+            Right => (x + 1, y),
+            Down => (x, y - 1),
+            Left => (x - 1, y),
         };
 
         if new_x < 0 || new_x >= self.width {
             return false;
         }
-
 
         if new_y < 0 || new_y >= self.height {
             return false;
@@ -120,8 +132,6 @@ impl Board {
         } else {
             (x, y - 1)
         };
-
-
 
         return !(self.has_wall(wall_location1, orientation)
             || self.has_wall(wall_location2, orientation));
@@ -155,7 +165,7 @@ impl Board {
 
         return 0;
     }
-    
+
     pub fn can_place_wall(&self, (x, y): Point, orientation: Orientation) -> bool {
         // Check that wall is on the board
         if !(x >= 0 && x < self.width && y >= 0 && y < self.height) {
@@ -171,34 +181,49 @@ impl Board {
                         return false;
                     }
 
-                    // If they do not have the same center 
+                    // If they do not have the same center
                     // Then having different orientations
                     // means that they can't be interfering
                     if orientation != *w_orient {
                         continue;
                     }
 
-
-                    if (x - 1 == *w_x || x + 1 == *w_x) && y == *w_y && orientation == Orientation::Horizontal {
+                    if (x - 1 == *w_x || x + 1 == *w_x)
+                        && y == *w_y
+                        && orientation == Orientation::Horizontal
+                    {
                         return false;
                     }
 
-                    if (y - 1 == *w_y || y + 1 == *w_y) && x == *w_x && orientation == Orientation::Vertical {
+                    if (y - 1 == *w_y || y + 1 == *w_y)
+                        && x == *w_x
+                        && orientation == Orientation::Vertical
+                    {
                         continue;
                     }
-                },
-                Wall::None => {continue}
+                }
+                Wall::None => continue,
             }
+        }
+
+        // Check that pawns have a route to target
+        use crate::path_finder::is_path;
+
+        let board_with_wall = (*self).place_wall((x, y), orientation);
+
+        if !is_path(board_with_wall, &self.pawns[0], |(_, y)| y == 8) {
+            return false;
+        }
+
+        if !is_path(board_with_wall, &self.pawns[0], |(_, y)| y == 0) {
+            return false;
         }
 
         return true;
     }
 
     pub fn place_wall(mut self, (x, y): Point, orientation: Orientation) -> Board {
-       
-        if self.can_place_wall((x,y), orientation) {
-            self.walls[self.first_empty_wall()] = Wall::Wall((x, y), orientation);
-        }
+        self.walls[self.first_empty_wall()] = Wall::Wall((x, y), orientation);
         return self;
     }
 
@@ -216,7 +241,7 @@ impl Board {
         return false;
     }
 
-    pub fn is_pawn(&self, location:&Point) -> bool {
+    pub fn is_pawn(&self, location: &Point) -> bool {
         for pawn in self.pawns.iter() {
             if pawn == location {
                 return true;
@@ -224,7 +249,6 @@ impl Board {
         }
 
         return false;
-
     }
 }
 
@@ -345,7 +369,6 @@ mod test {
         board = start_board.place_wall((3, 5), Orientation::Horizontal);
         assert_eq!(start_board, board);
 
-
         let start_board2 = Board::create()
             .set_width(10)
             .set_height(10)
@@ -363,66 +386,58 @@ mod test {
             .set_width(10)
             .set_height(10)
             .set_pawn(0, (5, 5));
-        assert!(start_board.can_move(0, Up));
-        assert!(start_board.can_move(0, Right));
-        assert!(start_board.can_move(0, Down));
-        assert!(start_board.can_move(0, Left));
+        assert!(start_board.pawn_can_move(0, Up));
+        assert!(start_board.pawn_can_move(0, Right));
+        assert!(start_board.pawn_can_move(0, Down));
+        assert!(start_board.pawn_can_move(0, Left));
 
         let board = start_board.place_wall((5, 5), Orientation::Horizontal);
-        assert!(!board.can_move(0, Up));
+        assert!(!board.pawn_can_move(0, Up));
 
         let board = start_board.place_wall((4, 5), Orientation::Horizontal);
-        assert!(!board.can_move(0, Up));
+        assert!(!board.pawn_can_move(0, Up));
 
         let board = start_board.place_wall((5, 5), Orientation::Vertical);
-        assert!(!board.can_move(0, Right));
+        assert!(!board.pawn_can_move(0, Right));
 
         let board = start_board.place_wall((5, 4), Orientation::Vertical);
-        assert!(!board.can_move(0, Right));
+        assert!(!board.pawn_can_move(0, Right));
 
         let board = start_board.place_wall((4, 5), Orientation::Vertical);
-        assert!(!board.can_move(0, Left));
+        assert!(!board.pawn_can_move(0, Left));
 
         let board = start_board.place_wall((4, 4), Orientation::Vertical);
-        assert!(!board.can_move(0, Left));
+        assert!(!board.pawn_can_move(0, Left));
 
         let board = start_board.place_wall((4, 4), Orientation::Horizontal);
-        assert!(!board.can_move(0, Down));
+        assert!(!board.pawn_can_move(0, Down));
 
         let board = start_board.place_wall((5, 4), Orientation::Horizontal);
-        assert!(!board.can_move(0, Down));
+        assert!(!board.pawn_can_move(0, Down));
     }
 
     #[test]
     fn test_can_move() {
         let mut board = Board::create_default();
-        assert!(!board.can_move(0, Down));
-        assert!(board.can_move(0, Up));
-        assert!(!board.can_move(1, Up));
-        assert!(board.can_move(1, Down));
+        assert!(!board.pawn_can_move(0, Down));
+        assert!(board.pawn_can_move(0, Up));
+        assert!(!board.pawn_can_move(1, Up));
+        assert!(board.pawn_can_move(1, Down));
 
         board = board.set_pawn(0, (0, 0));
-        assert!(!board.can_move(0, Left));
-        assert!(!board.can_move(0, Down));
-        assert!(board.can_move(0, Up));
-        assert!(board.can_move(0, Right));
+        assert!(!board.pawn_can_move(0, Left));
+        assert!(!board.pawn_can_move(0, Down));
+        assert!(board.pawn_can_move(0, Up));
+        assert!(board.pawn_can_move(0, Right));
     }
 
     #[test]
     fn edge_case_wall_placement() {
         let board = Board::create_default()
-            .place_wall((0,0), Orientation::Vertical)
-            .place_wall((1,1), Orientation::Vertical);
+            .place_wall((0, 0), Orientation::Vertical)
+            .place_wall((1, 1), Orientation::Vertical);
 
-        assert!(board.has_wall((0,0), Orientation::Vertical));
-        assert!(board.has_wall((1,1), Orientation::Vertical));
-
-
-        
-
-    
+        assert!(board.has_wall((0, 0), Orientation::Vertical));
+        assert!(board.has_wall((1, 1), Orientation::Vertical));
     }
-    
 }
-
-

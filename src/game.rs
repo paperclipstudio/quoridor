@@ -69,7 +69,7 @@ impl Quoridor {
     pub fn play(&mut self, turn: Turn) -> bool {
         return match turn {
             Turn::MovePawn(direction) => {
-                if !self.board.can_move(self.current_player() as i8, direction) {
+                if !self.board.pawn_can_move(self.current_player() as i8, direction) {
                     return false;
                 }
                 self.board = self.board.move_pawn(self.current_player() as i8, direction);
@@ -84,7 +84,7 @@ impl Quoridor {
     }
 
     pub fn can_move(&self, direction: Direction) -> bool {
-        return self.board.can_move(self.current_player() as i8, direction);
+        return self.board.pawn_can_move(self.current_player() as i8, direction);
     }
 
     pub fn is_valid(&self, turn: Turn) -> bool {

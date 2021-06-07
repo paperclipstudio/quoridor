@@ -58,27 +58,7 @@ where
     let mut result = false;
     while !to_search.is_empty() && !result {
         let current = to_search.pop().unwrap();
-        
-        for not_y in 0..10 {
-            let y = 9 - not_y;
-            for x in 0..10 {
-                if (x, y) == current {
-                    print!("@")
-                } else if (x, y) == (0, 0) {
-                    print!("O")
-                } else if searched.contains(&(x, y)) {
-                    print!("x")
-                } else if to_search.contains(&(x,y)) {
-                    print!("*")
-                }else {
-                    print!("-")
-                }
-            }
-            println!("")
-        }
-        println!("\n\n");
-        
-        //println!("({}, {})", current.0, current.1);
+
         searched.push(current);
         for direction in [Up, Right, Left, Down].iter() {
             let one_step = shift(&current, *direction);
@@ -93,16 +73,6 @@ where
             }
         }
     }
-
-    for not_y in 0..10 {
-        let y = 9 - not_y;
-        for x in 0..10 {
-            let message = if searched.contains(&(x, y)) { "x" } else { "-" };
-            print!("{}", message);
-        }
-        println!("")
-    }
-
     return result;
 }
 

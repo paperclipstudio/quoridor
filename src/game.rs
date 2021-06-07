@@ -66,19 +66,13 @@ impl Quoridor {
         return self.board.get_pawn(0).unwrap().1 == 8 || self.board.get_pawn(1).unwrap().1 == 0;
     }
 
-    pub fn play(&mut self, turn: Turn) -> bool {
-        return match turn {
+    pub fn play(&mut self, turn: Turn) {
+        match turn {
             Turn::MovePawn(direction) => {
-                if !self.board.pawn_can_move(self.current_player() as i8, direction) {
-                    return false;
-                }
-                self.board = self.board.move_pawn(self.current_player() as i8, direction);
-
-                true
+                self.move_pawn(direction);
             }
             Turn::PlaceWall(location, orientation) => {
-                self.board = self.board.place_wall(location, orientation);
-                return true;
+                self.place_wall(location, orientation);
             }
         };
     }
@@ -207,12 +201,4 @@ mod tests {
         assert!(game.has_won());
     }
 
-    #[test]
-    fn test_playing() {
-        let mut game = Quoridor::new_two_player();
-        let invalid = Turn::MovePawn(Direction::Down);
-        let valid = Turn::MovePawn(Direction::Up);
-        assert!(!game.play(invalid));
-        assert!(game.play(valid));
-    }
 }

@@ -215,7 +215,7 @@ impl Board {
             return false;
         }
 
-        if !is_path(board_with_wall, &self.pawns[0], |(_, y)| y == 0) {
+        if !is_path(board_with_wall, &self.pawns[1], |(_, y)| y == 0) {
             return false;
         }
 

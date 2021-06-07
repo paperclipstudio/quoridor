@@ -91,6 +91,11 @@ impl Quoridor {
 
     pub fn to_string(&self) -> String {
         let mut result = String::new();
+        result.push_str("\n");
+        result.push_str(format!("Player 1: {} walls left \nPlayer 2: {} walls left\nCurrent Player: {} \n\n", 
+            self.walls_left[0], 
+            self.walls_left[1],
+            self.current_player()+1).as_str());
         for not_y in 0..self.board.get_height() {
             let y = self.board.get_height() - not_y - 1;
 

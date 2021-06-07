@@ -340,46 +340,7 @@ mod test {
         assert!(board.has_wall((4, 4), Orientation::Horizontal));
         assert!(!board.has_wall((4, 5), Orientation::Horizontal));
     }
-    #[test]
-    fn test_place_wall_off_board() {
-        let starting_board = Board::create().set_width(5).set_height(3);
 
-        let mut board = starting_board.place_wall((-1, 0), Orientation::Vertical);
-        assert_eq!(starting_board, board);
-        board = board.place_wall((-1, -1), Orientation::Vertical);
-        assert_eq!(starting_board, board);
-        board = board.place_wall((5, 1), Orientation::Vertical);
-        assert_eq!(starting_board, board);
-        board = board.place_wall((1, 3), Orientation::Vertical);
-        assert_eq!(starting_board, board);
-        board = board.place_wall((5, 3), Orientation::Vertical);
-        assert_eq!(starting_board, board);
-    }
-
-    #[test]
-    fn test_wall_cant_be_placed_on_wall() {
-        let start_board = Board::create()
-            .set_width(10)
-            .set_height(10)
-            .place_wall((4, 5), Orientation::Horizontal);
-
-        let mut board = start_board.place_wall((4, 5), Orientation::Vertical);
-        assert_eq!(start_board, board);
-
-        board = start_board.place_wall((3, 5), Orientation::Horizontal);
-        assert_eq!(start_board, board);
-
-        let start_board2 = Board::create()
-            .set_width(10)
-            .set_height(10)
-            .place_wall((4, 5), Orientation::Vertical);
-
-        board = start_board2.place_wall((4, 6), Orientation::Vertical);
-        assert_eq!(start_board2, board);
-
-        board = start_board2.place_wall((4, 4), Orientation::Vertical);
-        assert_eq!(start_board2, board);
-    }
     #[test]
     fn test_pawn_cant_pawn_move_though_wall() {
         let start_board = Board::create()

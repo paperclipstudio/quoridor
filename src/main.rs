@@ -14,7 +14,8 @@ fn main() {
 }
 
 fn clear_screen() {
-    assert!(Command::new("clear").status().unwrap().success());
+    print!("\x1B[2J");
+    //assert!(Command::new("clear").status().unwrap().success());
 }
 
 fn start_game() {
@@ -45,7 +46,9 @@ fn new_from_file(file_name: String) -> game::Quoridor {
 fn get_turn(game: &game::Quoridor) -> Turn {
     clear_screen();
     //println!("{}", game.history_to_str());
+    dbg!("Before");
     std::fs::File::create("last_game.sav").unwrap();
+    dbg!("After");
     let mut save_file = std::fs::OpenOptions::new().append(false).write(true).open("last_game.sav").expect("Couldn't Save game");
     save_file.write(game.history_to_str().as_bytes()).unwrap();
     println!("Quoridor Game");

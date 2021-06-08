@@ -142,16 +142,16 @@ impl Quoridor {
                 if self.board.has_wall((x - 1, y), Orientation::Horizontal)
                     || self.board.has_wall((x, y), Orientation::Horizontal)
                 {
-                    result.push_str("��")
+                    result.push_str("X")
                 } else {
-                    result.push_str("  ")
+                    result.push_str("-")
                 }
                 if self.board.has_wall((x, y), Orientation::Horizontal)
                     || self.board.has_wall((x, y), Orientation::Vertical)
                 {
-                    result.push_str("✖")
+                    result.push_str("X")
                 } else {
-                    result.push_str("  ")
+                    result.push_str("-")
                 }
             }
 
@@ -159,17 +159,17 @@ impl Quoridor {
             for x in 0..self.board.get_width() {
                 // Add a squares row
                 if self.pawn_at((x, y)) {
-                    result.push_str("�‍���")
+                    result.push_str("P")
                 } else {
-                    result.push_str("��");
+                    result.push_str("*");
                 }
                 if x != self.board.get_width() - 1 {
                     if self.board.has_wall((x, y-1), Orientation::Vertical)
                         || self.board.has_wall((x,y), Orientation::Vertical)
                     {
-                        result.push_str("✖")
+                        result.push_str("O")
                     } else {
-                        result.push_str("  ");
+                        result.push_str(" ");
                     }
                 }
             }

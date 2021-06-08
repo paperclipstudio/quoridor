@@ -5,7 +5,7 @@ mod path_finder;
 use dialoguer::{theme::ColorfulTheme, Input, Select};
 use game::{Quoridor, Turn, Turn::*};
 
-use std::process::Command;
+use std::{io::Write, process::Command};
 
 use crate::board::{Direction, Direction::*, Orientation};
 
@@ -30,8 +30,24 @@ fn start_game() {
     println!("Well done some one won");
 }
 
+fn new_from_file(file_name: String) -> game::Quoridor {
+    let result = Quoridor::new_two_player();
+    std::fs::OpenOptions::new()
+        .read(true)
+        .write(false)
+        .open(format!("saves/{}", file_name))
+        .err();
+
+    return result;
+    
+}
+
 fn get_turn(game: &game::Quoridor) -> Turn {
     clear_screen();
+    //println!("{}", game.history_to_str());
+    std::fs::File::create("last_game.sav").unwrap();
+    let mut save_file = std::fs::OpenOptions::new().append(false).write(true).open("last_game.sav").expect("Couldn't Save game");
+    save_file.write(game.history_to_str().as_bytes()).unwrap();
     println!("Quoridor Game");
     print!("{}", game.to_string());
     let items = vec!["Move Pawn", "Place Wall"];

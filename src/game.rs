@@ -1,10 +1,13 @@
 
 #![allow(dead_code)]
 
+use std::collections::LinkedList;
+
 use crate::board::Board;
 use crate::board::Direction;
 use crate::board::Orientation;
 use crate::board::Point;
+use std::fs::{File};
 
 #[derive(Clone, Copy)]
 pub enum Turn {
@@ -15,6 +18,7 @@ pub struct Quoridor {
     board: Board,
     current_player: i32,
     walls_left: [i32; 2],
+    history: Vec<Turn>
 }
 
 impl Quoridor {
@@ -24,6 +28,7 @@ impl Quoridor {
             board: Board::create_default(),
             current_player: 0,
             walls_left: [10, 10],
+            history: Vec::new()
         };
     }
 
@@ -36,7 +41,7 @@ impl Quoridor {
     }
 
     fn next_turn(&mut self) {
-        self.current_player = self.current_player + 1 % 2;
+        self.current_player = (self.current_player + 1) % 2;
     }
 
     pub fn walls_left(&self, player: i32) -> i32 {
@@ -76,6 +81,7 @@ impl Quoridor {
     }
 
     pub fn play(&mut self, turn: Turn) {
+        self.history.push(turn);
         match turn {
             Turn::MovePawn(direction) => {
                 self.move_pawn(direction);
@@ -84,6 +90,21 @@ impl Quoridor {
                 self.place_wall(location, orientation);
             }
         };
+    }
+
+    pub fn history_to_str(&self) -> String{
+        let mut result: String = String::new();
+        for turn in self.history.iter() {
+                match turn {
+                Turn::MovePawn(dir) => {
+                    result.push_str(format!("M-{:?}\n", dir).as_str());
+                }
+                Turn::PlaceWall((x,y), ori) => {
+                    result.push_str(format!("P-{},{}-{:?}\n", x, y, ori).as_str())
+                }
+            }
+        }
+        return result;
     }
 
     pub fn can_move(&self, direction: Direction) -> bool {

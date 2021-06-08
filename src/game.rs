@@ -159,9 +159,9 @@ impl Quoridor {
             for x in 0..self.board.get_width() {
                 // Add a squares row
                 if self.pawn_at((x, y)) {
-                    result.push_str("�‍���")
+                    result.push_str("😀")
                 } else {
-                    result.push_str("��");
+                    result.push_str("  ");
                 }
                 if x != self.board.get_width() - 1 {
                     if self.board.has_wall((x, y-1), Orientation::Vertical)

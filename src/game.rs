@@ -138,38 +138,41 @@ impl Quoridor {
             let y = self.board.get_height() - not_y - 1;
 
             // Add wall row 
+            result.push_str((y+1).to_string().as_str());
+            result.push_str(" ");
             for x in 0..self.board.get_width() {
                 if self.board.has_wall((x - 1, y), Orientation::Horizontal)
                     || self.board.has_wall((x, y), Orientation::Horizontal)
                 {
-                    result.push_str("X")
+                    result.push_str("##")
                 } else {
-                    result.push_str("-")
+                    result.push_str("  ")
                 }
                 if self.board.has_wall((x, y), Orientation::Horizontal)
                     || self.board.has_wall((x, y), Orientation::Vertical)
                 {
-                    result.push_str("X")
+                    result.push_str("##")
                 } else {
-                    result.push_str("-")
+                    result.push_str("  ")
                 }
             }
 
             result.push_str("\n");
+                result.push_str("  ");
             for x in 0..self.board.get_width() {
                 // Add a squares row
                 if self.pawn_at((x, y)) {
-                    result.push_str("P")
+                    result.push_str("PP")
                 } else {
-                    result.push_str("*");
+                    result.push_str("()");
                 }
                 if x != self.board.get_width() - 1 {
                     if self.board.has_wall((x, y-1), Orientation::Vertical)
                         || self.board.has_wall((x,y), Orientation::Vertical)
                     {
-                        result.push_str("O")
+                        result.push_str("##")
                     } else {
-                        result.push_str(" ");
+                        result.push_str("  ");
                     }
                 }
             }
@@ -178,6 +181,10 @@ impl Quoridor {
             result.push_str("\n");
             
         }
+
+        //result.push_str("why can;'t I see this?");
+
+        result.push_str("    A   B   C   D   E   F   G   H\n");
 
         return result;
     }
